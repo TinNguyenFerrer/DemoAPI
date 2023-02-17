@@ -34,11 +34,14 @@ namespace DemoAPI.Controllers
             return Ok(_DBContext.Products.Find(id));
         }
 
-        //// POST api/<ProductController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
+        // POST api/<ProductController>
+        [HttpPost]
+        public IActionResult Post([FromBody] Product product)
+        {
+            _DBContext.Add(product);
+            _DBContext.SaveChanges();
+            return Ok();
+        }
 
         // PUT api/<ProductController>/5
         [HttpPut("{id}")]
