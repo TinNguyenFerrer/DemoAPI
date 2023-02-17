@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using DemoAPI.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using static System.Reflection.Metadata.BlobBuilder;
 
@@ -11,46 +13,55 @@ namespace DemoAPI.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
+        private readonly DemoAngu_DBContext _DBContext;
 
+        public ProductController(DemoAngu_DBContext dBContext)
+        {
+            _DBContext = dBContext;
+        }
 
         // GET: api/<ProductController>
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            Product[] product = new Product[] {
-                new Product(2, "Biographies & Memoirs", "Biographies & Memoirs", 2),
-                new Product(1, "Art & Photography", " All kinds of books related to business and investing: management, finance, entrepreneurs, startup, skills, sales, etc.", 32),
-                new Product(31, "How-to - Self Help","dsds" , 36)
-
-            };
-            var t = product.ToList();
-
-            return Ok(product);
+            return Ok(_DBContext.Products.ToList());
         }
 
         // GET api/<ProductController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public IActionResult Get(int id)
         {
-            return "value";
+            return Ok(_DBContext.Products.Find(id));
         }
 
-        // POST api/<ProductController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
+        //// POST api/<ProductController>
+        //[HttpPost]
+        //public void Post([FromBody] string value)
+        //{
+        //}
 
         // PUT api/<ProductController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public IActionResult Put(int id, [FromBody] Product product)
         {
+            _DBContext.Products.Attach(product);
+            _DBContext.Entry(product).State = EntityState.Modified;
+            _DBContext.SaveChanges();
+            return Ok();
         }
 
         // DELETE api/<ProductController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
+            var exit = _DBContext.Products.Find(id);
+            if(exit != null)
+            {
+                _DBContext.Remove(exit);
+                _DBContext.SaveChanges();
+                return Ok();
+            }
+            return BadRequest();
         }
     }
 
